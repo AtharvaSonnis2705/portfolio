@@ -1,0 +1,421 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* Design tokens — "AI-native dark"                                     */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-*: initial;
+  --color-bg: #07090b; /* page */
+  --color-bg-elevated: #0d1114; /* cards */
+  --color-bg-subtle: #131a1f; /* hover, inputs */
+  --color-border: #1e272e;
+  --color-border-strong: #2b3740;
+  --color-fg: #e8eef2; /* primary text */
+  --color-fg-muted: #8a9aa6; /* secondary text — 6.9:1 on bg */
+  --color-fg-faint: #748692; /* metadata — nudged from #5B6B77 so 12px labels pass AA (5.3:1) */
+  --color-accent: #22d3ee;
+  --color-accent-soft: rgb(34 211 238 / 0.12);
+  --color-accent-glow: rgb(34 211 238 / 0.35);
+  --color-success: #34d399;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #fff;
+  --color-black: #000;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Fluid type scale */
+  --text-display: clamp(3.5rem, 1.9rem + 5.6vw, 6rem); /* 56–96px */
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.04em;
+  --text-display--font-weight: 600;
+  --text-h2: clamp(2rem, 1.55rem + 1.9vw, 3rem); /* 32–48px */
+  --text-h2--line-height: 1.08;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h3: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem); /* 20–24px */
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.015em;
+  --text-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16–18px */
+  --text-body--line-height: 1.65;
+  --text-label: 0.75rem; /* 12px mono */
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --container-content: 1200px;
+  --container-prose: 68ch;
+
+  --animate-pulse-dot: pulse-dot 2.4s var(--ease-out-expo) infinite;
+  --animate-word-in: word-in 0.8s var(--ease-out-expo) both;
+  --animate-marquee: marquee 40s linear infinite;
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgb(52 211 153 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgb(52 211 153 / 0);
+  }
+}
+@keyframes word-in {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                 */
+/* ------------------------------------------------------------------ */
+@layer base {
+  :root {
+    color-scheme: dark;
+    --gutter: 16px;
+    --section-y: 80px;
+    --nav-h: 72px;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --gutter: 24px;
+      --section-y: 144px;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--nav-h) + 16px);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-accent-glow);
+    color: var(--color-fg);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Inputs draw their own ring */
+  input:focus-visible,
+  textarea:focus-visible {
+    outline-offset: 0;
+  }
+  img,
+  video {
+    max-width: 100%;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Components                                                           */
+/* ------------------------------------------------------------------ */
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: calc(var(--container-content) + var(--gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  .section {
+    padding-block: var(--section-y);
+  }
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    text-transform: uppercase;
+    color: var(--color-fg-faint);
+  }
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--color-fg-faint);
+  }
+
+  /* Faint dotted background that fades out radially */
+  .bg-dots {
+    background-image: radial-gradient(var(--color-border-strong) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+  }
+
+  /* Card with cursor-following spotlight (vars set by <Spotlight>) */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+    --mx: 50%;
+    --my: 50%;
+    --spot: 0;
+  }
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--spot);
+    transition: opacity 0.3s var(--ease-out-expo);
+    background: radial-gradient(
+      420px circle at var(--mx) var(--my),
+      var(--color-accent-soft),
+      transparent 60%
+    );
+  }
+  .spotlight::after {
+    /* brightened border under the cursor */
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
+    padding: 1px;
+    opacity: var(--spot);
+    transition: opacity 0.3s var(--ease-out-expo);
+    background: radial-gradient(
+      260px circle at var(--mx) var(--my),
+      var(--color-accent-glow),
+      transparent 70%
+    );
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-subtle);
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0.375rem 0.625rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* Hero headline word mask reveal (pure CSS, no JS) */
+  .word-mask {
+    display: inline-block;
+    overflow: clip;
+    overflow-clip-margin: 0.12em;
+    vertical-align: top;
+    padding-bottom: 0.06em;
+  }
+  .word-mask > span {
+    display: inline-block;
+    animation: var(--animate-word-in);
+    animation-delay: calc(var(--i, 0) * 60ms + 80ms);
+  }
+
+  /* Section reveal — hidden only once JS has marked the document (no-JS = visible) */
+  .js [data-reveal]:not(.is-in) {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .js [data-reveal] {
+    transition:
+      opacity 0.5s var(--ease-out-expo),
+      transform 0.5s var(--ease-out-expo);
+    transition-delay: calc(var(--stagger, 0) * 60ms);
+  }
+
+  /* Duotone headshot: cyan-tinted by default, full colour on hover */
+  .duotone {
+    position: relative;
+    overflow: hidden;
+  }
+  .duotone img {
+    filter: grayscale(1) contrast(1.05) brightness(0.9);
+    transition: filter 0.6s var(--ease-out-expo);
+  }
+  .duotone::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #22d3ee 0%, #0e7490 60%, #07090b 100%);
+    mix-blend-mode: color;
+    opacity: 0.85;
+    transition: opacity 0.6s var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .duotone:hover img,
+  .duotone:focus-within img {
+    filter: none;
+  }
+  .duotone:hover::after,
+  .duotone:focus-within::after {
+    opacity: 0;
+  }
+
+  /* Long-form case-study typography */
+  .prose-case {
+    color: var(--color-fg-muted);
+    max-width: var(--container-prose);
+  }
+  .prose-case > * + * {
+    margin-top: 1.25em;
+  }
+  .prose-case h2 {
+    color: var(--color-fg);
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    letter-spacing: var(--text-h3--letter-spacing);
+    font-weight: 600;
+    margin-top: 2.75em;
+    scroll-margin-top: calc(var(--nav-h) + 24px);
+  }
+  .prose-case h3 {
+    color: var(--color-fg);
+    font-weight: 600;
+    margin-top: 2em;
+    scroll-margin-top: calc(var(--nav-h) + 24px);
+  }
+  .prose-case strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+  .prose-case a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-glow);
+    text-underline-offset: 3px;
+  }
+  .prose-case a:hover {
+    text-decoration-color: var(--color-accent);
+  }
+  .prose-case ul {
+    list-style: none;
+    padding: 0;
+  }
+  .prose-case ul > li {
+    position: relative;
+    padding-left: 1.25em;
+  }
+  .prose-case ul > li + li {
+    margin-top: 0.5em;
+  }
+  .prose-case ul > li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.4em;
+    height: 1px;
+    background: var(--color-fg-faint);
+  }
+  .prose-case ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+  .prose-case :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    color: var(--color-fg);
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.1em 0.35em;
+  }
+  .prose-case pre {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    padding: 1.25rem;
+    background: var(--color-bg-elevated) !important;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* View transitions — subtle cross-fade between routes                  */
+/* ------------------------------------------------------------------ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion: no tilt, no mesh animation, instant reveals          */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .js [data-reveal]:not(.is-in) {
+    opacity: 1;
+    transform: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* cmdk group headings */
+.palette-group [cmdk-group-heading] {
+  padding: 0.75rem 0.75rem 0.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-fg-faint);
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

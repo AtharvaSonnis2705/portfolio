@@ -1,0 +1,75 @@
+---
+title: SAANS — Doctor Appointment System
+summary: Full-stack MERN platform for booking, managing and paying for doctor appointments, with separate patient, doctor and admin experiences.
+outcome: Three-role booking platform — patients, doctors and admins — with secure auth and online payments.
+date: "2025-11" # TODO(Atharva): confirm (taken from the GitHub upload date)
+role: Full-stack developer
+timeline: TODO(Atharva)
+status: shipped
+featured: true
+order: 2
+categories: [fullstack]
+stack: [React, Node.js, Express, MongoDB, JavaScript, JWT, bcrypt, Cloudinary]
+cover:
+  src: /images/projects/doctor-appointment-system/cover.webp
+  alt: SAANS project cover — appointment calendar grid with role badges
+links:
+  github: https://github.com/AtharvaSonnis2705/SAANS---medical-booking-app
+  live: https://saans-medical-booking-app.vercel.app
+tldr:
+  - A MERN application that streamlines medical appointment scheduling, management and payments.
+  - Built role-based auth (User/Doctor/Admin) with JWT + bcrypt, the Express + Mongoose API, and Cloudinary media handling.
+  - Shipped as three apps — patient frontend, admin/doctor panel and backend — and deployed on Vercel.
+---
+
+## Problem
+
+Booking a doctor usually means phone calls, double-booked slots and no record of payment. Clinics also need different views of the same data: patients want to find and book a doctor, doctors want their schedule, and admins need to manage both.
+
+## Approach & key decisions
+
+**Three apps, one API.** The repository is split into `frontend` (patients), `admin` (admins and doctors) and `backend`. Each UI only ships the screens its users need, while the Express API stays the single source of truth.
+
+**Role-based access from the token up.** Passwords are hashed with bcrypt and sessions use JWTs, with separate authentication for users, doctors and admins — so protected endpoints are enforced by the API, not just hidden in the UI.
+
+**MongoDB + Mongoose for flexible profiles.** Doctor profiles (specialty, fees, availability) and appointments map naturally to documents; Mongoose schemas add validation at the data layer.
+
+**Cloudinary for media.** Media uploads go to Cloudinary rather than the API server's disk, keeping the backend stateless and easy to host.
+
+<Todo>Check these decisions against your code and add the ones that mattered most to you.</Todo>
+
+## Architecture
+
+<Architecture
+  nodes={[
+    { label: "Patient app", detail: "React — search, book, pay" },
+    { label: "Admin / Doctor panel", detail: "React — schedules, doctors" },
+    { label: "Express API", detail: "JWT auth · bcrypt" },
+    { label: "MongoDB", detail: "Mongoose models" },
+    { label: "Cloudinary", detail: "Profile media" },
+  ]}
+/>
+
+## Challenges & how I solved them
+
+- **Keeping three roles apart.** User, doctor and admin access runs through role-based JWT auth on the API, so protection doesn't depend on what the UI hides.
+
+<Todo>
+  Describe how you handled slot availability / double-booking, and which payment provider you
+  integrated.
+</Todo>
+
+## Results
+
+- Live at [saans-medical-booking-app.vercel.app](https://saans-medical-booking-app.vercel.app).
+
+<Todo>
+  Add screenshots to the gallery (patient booking flow, doctor dashboard, admin view) and put `
+  <Gallery />` here.
+</Todo>
+
+## What I'd do next
+
+- Move to TypeScript end to end and share types between the API and both UIs.
+- Add appointment reminders by email/SMS.
+- Add an LLM-powered symptom-to-specialty helper on the search page.

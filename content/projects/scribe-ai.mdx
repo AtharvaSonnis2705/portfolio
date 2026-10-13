@@ -1,0 +1,88 @@
+---
+title: ScribeAI
+summary: Upload a recording and get a transcript plus a structured summary — overview, key points, decisions and action items.
+outcome: Live app that turns raw meeting audio into a transcript, decisions and action items.
+date: "2026-08" # TODO(Atharva): confirm
+role: Solo build — UI, API routes, prompt design
+teamSize: 1 # TODO(Atharva): confirm
+timeline: TODO(Atharva)
+status: shipped
+featured: true
+order: 1
+categories: [ai, fullstack]
+stack: [Next.js, TypeScript, OpenAI API, Prompt Engineering, React, Tailwind CSS]
+cover:
+  src: /images/projects/scribe-ai/cover.webp
+  alt: ScribeAI project cover — audio waveform turning into structured summary lines
+links:
+  github: https://github.com/AtharvaSonnis2705/BuiltToSummarize
+  live: https://built-to-summarize.vercel.app
+tldr:
+  - A web app that transcribes an uploaded recording and summarizes it into overview, key points, decisions and action items.
+  - Built the Next.js UI and two server routes — one for speech-to-text, one for summarization — and wrote the grounded summarization prompt.
+  - Shipped and live on Vercel; the prompt only attributes owners and deadlines when the transcript states them.
+---
+
+## Problem
+
+Meetings and voice notes hold decisions and to-dos, but nobody re-listens to a 40-minute recording to find them. Generic "summarize this" prompts also tend to invent owners and deadlines that were never said — which is worse than no summary.
+
+## Approach & key decisions
+
+**Two steps, two routes.** Transcription and summarization are separate API routes (`/api/transcribe`, `/api/summarize`). The user sees the transcript first, which makes the summary auditable and lets a failed summary be retried without re-uploading audio.
+
+**Server-side keys only.** The browser never talks to OpenAI directly; it posts the file to a Next.js route handler that holds the key.
+
+**Grounded output by instruction.** The system prompt tells the model to extract only what is present in the transcript, and the user prompt asks for a fixed structure:
+
+```ts
+// app/api/summarize/route.ts (simplified)
+const response = await openai.responses.create({
+  model: "gpt-5-mini",
+  input: [
+    {
+      role: "system",
+      content:
+        "You are an expert meeting and conversation summarizer. Extract accurate, useful information from transcripts. Never invent information that is not present in the transcript.",
+    },
+    { role: "user", content: buildPrompt(transcript) }, // overview · key points · decisions · action items
+  ],
+});
+```
+
+Action items name a person or deadline **only when explicitly mentioned** — a small rule that removes the most damaging class of hallucination for this use case.
+
+**Validate before spending tokens.** Uploads are checked for presence and a 25 MB size cap before any model call.
+
+## Architecture
+
+<Architecture
+  caption="Audio never leaves the server boundary with the API key; each step can be retried independently."
+  nodes={[
+    { label: "Browser", detail: "Upload · transcript · summary UI" },
+    { label: "/api/transcribe", detail: "Validate file (≤25 MB) → speech-to-text" },
+    { label: "/api/summarize", detail: "Grounded prompt → structured summary" },
+    { label: "OpenAI", detail: "gpt-4o-mini-transcribe · gpt-5-mini" },
+  ]}
+/>
+
+## Challenges & how I solved them
+
+- **Hallucinated owners and dates.** Solved at the prompt level by constraining attribution to explicit mentions, and by showing the transcript alongside the summary so the user can verify.
+- **Large files and failed requests.** Size validation up front and clear error messages from each route, so the UI can tell "bad file" apart from "model error".
+
+<Todo>
+  Add one more real challenge you hit (e.g. long transcripts, latency, formatting the summary).
+</Todo>
+
+## Results
+
+- Live at [built-to-summarize.vercel.app](https://built-to-summarize.vercel.app).
+
+<Todo>Add any real usage numbers or feedback you have — leave this out if you don't have any.</Todo>
+
+## What I'd do next
+
+- Stream the summary so long recordings feel responsive.
+- Return structured JSON (schema-validated) instead of free text, so action items can be exported to a task tracker.
+- Speaker diarization, so action items can be tied to who actually said them.

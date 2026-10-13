@@ -1,0 +1,67 @@
+---
+title: Influence AI
+summary: Hackathon analytics dashboard that scores a YouTube channel's comments for toxicity, sponsorships and engagement.
+outcome: Dashboard that processes thousands of YouTube comments into toxicity, sponsorship and reach signals.
+date: "2025-03" # TODO(Atharva): confirm hackathon date
+role: Full-stack developer # TODO(Atharva): confirm your role on the team
+timeline: Hackathon
+status: archived
+featured: true
+order: 5
+categories: [ai, hackathon]
+stack: [React, Node.js, YouTube Data API]
+cover:
+  src: /images/projects/influence-ai/cover.webp
+  alt: Influence AI cover — dashboard bars and comment bubbles scored by sentiment
+links: {} # TODO(Atharva): add github / demo links
+tldr:
+  - An analytics dashboard, built at the Auraflix Tech-AI Hackathon, for judging whether a YouTube creator is a good brand fit.
+  - Built the React dashboard and the Node.js backend that pulls videos and comments from the YouTube API and scores them.
+  - Processed thousands of comments into toxicity, sponsorship and view metrics in a single dashboard.
+---
+
+<Todo>
+  Add your hackathon result/placement, team size (frontmatter `teamSize`) and what exactly you
+  owned.
+</Todo>
+
+## Problem
+
+Brands choosing an influencer usually look at follower counts and views. Those say nothing about the _audience_: is the comment section toxic, does the creator already run a lot of sponsorships, and do viewers actually engage?
+
+## Approach & key decisions
+
+**Use the comments, not just the counts.** The backend pulls a channel's recent videos and their comments through the YouTube Data API, then scores them, so the dashboard reflects how the audience behaves.
+
+**Separate collection from presentation.** A Node.js backend handles API quotas and scoring; the React dashboard only renders the aggregated results.
+
+<Todo>
+  Explain how toxicity and sponsorships were detected — a model, an external API (e.g. Perspective),
+  or keyword rules?
+</Todo>
+
+## Architecture
+
+<Architecture
+  nodes={[
+    { label: "React dashboard", detail: "Charts · channel view" },
+    { label: "Node.js API", detail: "Fetch · score · aggregate" },
+    { label: "YouTube Data API", detail: "Videos · comments · stats" },
+  ]}
+/>
+
+<Todo>
+  Add a "## Challenges & how I solved them" section with 1–2 real problems you hit during the
+  hackathon.
+</Todo>
+
+## Results
+
+- Processed thousands of comments per analysis into toxicity, sponsorship and view metrics.
+
+<Todo>Hackathon placement / judges' feedback.</Todo>
+
+## What I'd do next
+
+- Use an LLM classifier for toxicity and sponsorship detection, measured against a small labelled eval set.
+- Cache channel analyses so repeat lookups are instant and quota-free.

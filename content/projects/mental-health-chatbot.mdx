@@ -1,0 +1,73 @@
+---
+title: Mental Health Support Chatbot
+summary: NLP chatbot that classifies what a user is expressing and responds with a supportive message from the right category.
+outcome: Intent-classification pipeline that routes distress signals to therapeutic response categories.
+date: "2025-01" # TODO(Atharva): confirm
+role: ML engineer — NLP pipeline and model
+timeline: TODO(Atharva)
+status: archived
+featured: true
+order: 4
+categories: [ai]
+stack: [Python, TensorFlow, Keras, NLTK]
+cover:
+  src: /images/projects/mental-health-chatbot/cover.webp
+  alt: Mental Health Chatbot cover — chat bubbles feeding into a small neural network
+links:
+  github: https://github.com/AtharvaSonnis2705/Mental-Health-Chatbot-
+tldr:
+  - A conversational support bot that recognizes the intent behind a message — stress, sadness, anxiety and more — and replies from a matching response category.
+  - Built the NLP pipeline (NLTK tokenization + lemmatization, bag-of-words features) and trained a Keras/TensorFlow dense neural network intent classifier.
+  - A working end-to-end classifier and chat loop — with clear limits on what such a bot should and shouldn't do.
+---
+
+<Callout type="warning" title="Ethics & safety">
+  This is a learning project, not a medical device or a substitute for professional care. An intent
+  classifier can misread a message, so a real deployment would need crisis-keyword escalation to
+  human help lines, clear disclaimers in the UI, no storage of conversations by default, and review
+  by mental-health professionals.
+</Callout>
+
+<Todo>
+  Your repo README is based on Rogendo/Mental-health-Chatbot. If you built on that project, credit
+  it here in one line (e.g. "Started from …, I rebuilt the pipeline and …") — honest attribution
+  reads better to engineers than silence.
+</Todo>
+
+## Problem
+
+People often type how they feel before they're ready to talk to anyone. A bot can't replace a counsellor, but it can respond quickly, kindly and consistently — as long as it understands _what kind_ of message it received.
+
+## Approach & key decisions
+
+**Intent classification, not free generation.** Responses come from curated categories rather than a generative model, so the bot can't improvise an unsafe or made-up reply — the trade-off is less flexibility.
+
+**A small, explainable NLP pipeline.** Messages are tokenized and lemmatized with NLTK ("worried", "worrying" → "worry"), turned into a bag-of-words vector, and classified by a dense neural network built with Keras on TensorFlow, with a softmax over intent classes.
+
+<Todo>
+  Did you add a fallback reply when the model's top probability is low? If yes, add a "Confidence
+  threshold" paragraph here.
+</Todo>
+
+## Architecture
+
+<Architecture
+  nodes={[
+    { label: "User message", detail: "Free text" },
+    { label: "NLTK", detail: "Tokenize · lemmatize" },
+    { label: "Bag of words", detail: "Vocabulary vector" },
+    { label: "Keras DNN", detail: "Softmax over intents" },
+    { label: "Response", detail: "Category-matched reply" },
+  ]}
+/>
+
+<Todo>
+  Add "## Challenges & how I solved them" (e.g. how you handled similar intents like "sad" vs
+  "lonely") and "## Results" with real validation accuracy if you measured it.
+</Todo>
+
+## What I'd do next
+
+- Replace bag-of-words with sentence embeddings (Hugging Face Transformers) for better generalization.
+- Add a retrieval layer over vetted mental-health resources (RAG) with citations.
+- Build an evaluation set reviewed by a professional before any real-world use.

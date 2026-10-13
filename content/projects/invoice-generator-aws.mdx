@@ -1,0 +1,60 @@
+---
+title: Invoice Generator on AWS
+summary: Create, store and email PDF invoices with embedded QR codes — React front end on a fully serverless AWS backend.
+outcome: Serverless invoicing — PDFs rendered on Lambda, stored in S3 and delivered by SES.
+date: "2025-06" # TODO(Atharva): confirm
+role: Full-stack developer
+timeline: TODO(Atharva)
+status: shipped
+featured: true
+order: 3
+categories: [fullstack, cloud]
+stack: [React, Vite, Tailwind CSS, Node.js, AWS Lambda, API Gateway, S3, SES, PDFKit]
+cover:
+  src: /images/projects/invoice-generator-aws/cover.webp
+  alt: Invoice Generator cover — invoice document with QR code flowing into cloud storage
+links: {} # TODO(Atharva): add github and live URLs
+tldr:
+  - A full-stack app that lets users create invoices, renders them as PDFs, stores them and emails them to the client.
+  - Built the React + Vite + Tailwind UI and the serverless backend — Lambda behind API Gateway, PDFKit rendering with QR codes, S3 storage and SES delivery.
+  - No servers to manage — every invoice is generated, stored and sent by managed AWS services.
+---
+
+## Problem
+
+Freelancers and small shops often build invoices by hand in a document editor, then export, attach and email them one by one. The goal: fill a form once, and get a well-formatted PDF that is stored safely and delivered to the client automatically.
+
+## Approach & key decisions
+
+**Serverless over a long-running server.** Invoice generation is bursty — nothing for hours, then a batch at month end. AWS Lambda behind API Gateway means paying per request and never managing a box.
+
+**Render PDFs on the server.** PDFKit runs inside the Lambda, so every invoice looks identical regardless of the user's browser, and the client receives a real PDF file rather than a printed web page.
+
+**QR codes inside the PDF.** Each invoice embeds a QR code generated at render time. <Todo>Say what the QR code encodes (payment link, invoice URL, UPI ID…).</Todo>
+
+**S3 for storage, SES for delivery.** The rendered PDF is written to S3 and sent through SES, which handles email deliverability.
+
+## Architecture
+
+<Architecture
+  caption="Request path for creating and sending one invoice."
+  nodes={[
+    { label: "React + Vite UI", detail: "Invoice form · Tailwind" },
+    { label: "API Gateway", detail: "HTTPS endpoint" },
+    { label: "AWS Lambda", detail: "Node.js · PDFKit · QRCode" },
+    { label: "Amazon S3", detail: "Stores the PDF" },
+    { label: "Amazon SES", detail: "Emails the invoice" },
+  ]}
+/>
+
+<Todo>
+  Add "## Challenges & how I solved them" (e.g. bundling PDFKit fonts into the Lambda package, CORS
+  between API Gateway and the Vite app, SES sandbox verification) and "## Results", plus GitHub/live
+  links in the frontmatter and a short demo.mp4 + poster.webp.
+</Todo>
+
+## What I'd do next
+
+- Infrastructure as code (AWS CDK or SAM) so the whole stack deploys with one command.
+- Signed, expiring S3 URLs so clients can re-download invoices securely.
+- Recurring invoices on a schedule with EventBridge.

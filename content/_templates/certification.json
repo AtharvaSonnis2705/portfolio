@@ -1,0 +1,14 @@
+{
+  "_comment": "CERTIFICATION TEMPLATE — copy to content/certifications/<slug>.json (delete this _comment line). Put the certificate image at public/images/certifications/<slug>.webp and the optional original at <slug>.pdf, then git push.",
+  "title": "AWS Certified Cloud Practitioner",
+  "issuer": "Amazon Web Services",
+  "date": "2026-09",
+  "credentialId": "ABC123",
+  "verifyUrl": "https://www.credly.com/badges/…",
+  "image": {
+    "src": "/images/certifications/aws-cloud-practitioner.webp",
+    "alt": "AWS Certified Cloud Practitioner certificate"
+  },
+  "pdf": "/images/certifications/aws-cloud-practitioner.pdf",
+  "skills": ["AWS Lambda", "S3"]
+}

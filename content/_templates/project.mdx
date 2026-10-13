@@ -1,0 +1,81 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT TEMPLATE
+# 1. Copy to content/projects/<slug>.mdx — the filename becomes the URL: /work/<slug>
+# 2. Put images in public/images/projects/<slug>/  (cover.webp, 01.webp, demo.mp4, poster.webp)
+# 3. git push. It appears on /work, ⌘K, skills cross-links, sitemap and OG images automatically.
+# Strings starting with "TODO(Atharva)" show in dev and are hidden in production.
+# ─────────────────────────────────────────────────────────────────────────────
+title: My Project # required
+summary: One or two sentences, max 140 characters. Shown on cards and in search.
+outcome: The one-line result a recruiter should remember. # max 160 chars
+date: "2026-09" # "YYYY-MM" or "YYYY-MM-DD" — used for sorting
+role: Solo build — design, backend, infra
+teamSize: 1 # optional
+timeline: 3 weeks # optional free text
+status: shipped # shipped | in-progress | archived
+featured: false # true → appears in Selected Work on the home page
+order: 10 # optional; lower comes first, then newest date
+categories: [ai, fullstack] # any of: ai, fullstack, cloud, hackathon
+stack: [Next.js, TypeScript, LangGraph] # names matching content/site.ts skills get cross-linked
+cover:
+  src: /images/projects/my-project/cover.webp # 1600×1000 WebP
+  alt: Describe what the image shows # required (accessibility)
+gallery: # optional — rendered by <Gallery /> below
+  - src: /images/projects/my-project/01.webp # 1600px wide
+    alt: Dashboard showing …
+    caption: Optional caption
+video: # optional — muted loop, plays on hover (desktop)
+  src: /images/projects/my-project/demo.mp4 # ≤ 8 MB, H.264
+  poster: /images/projects/my-project/poster.webp
+links: # all optional — buttons only render if present
+  github: https://github.com/AtharvaSonnis2705/my-project
+  live: https://my-project.vercel.app
+  demo: https://youtu.be/… # video walkthrough
+metrics: # optional — ONLY real, measured numbers
+  - label: p95 latency
+    value: 420 ms
+tldr: # exactly 3 bullets
+  - What it is.
+  - What I did.
+  - The result.
+---
+
+## Problem
+
+What was broken or missing, and for whom?
+
+## Approach & key decisions
+
+The "why" behind your choices. Recruiters skim; engineers read this section.
+
+## Architecture
+
+<Architecture
+  caption="Optional caption"
+  nodes={[
+    { label: "Client", detail: "Next.js" },
+    { label: "API", detail: "Route handlers" },
+    { label: "LLM", detail: "Claude / OpenAI" },
+  ]}
+/>
+
+Or a diagram image: ![Architecture diagram](/images/projects/my-project/architecture.webp)
+
+## Challenges & how I solved them
+
+- Challenge → what you did → what changed.
+
+## Results
+
+- Real outcomes only.
+
+<Gallery />
+
+<Callout type="info" title="Optional">
+  Callouts support type="info" | "warning" | "success".
+</Callout>
+
+## What I'd do next
+
+- Next steps.
