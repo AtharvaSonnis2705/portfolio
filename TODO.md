@@ -9,7 +9,8 @@ Everything marked `TODO(Atharva)` shows highlighted in `pnpm dev` and is **hidde
 - [ ] `content/site.ts`: confirm "Open to remote/relocation" in the availability badge.
 - [ ] `content/site.ts`: confirm the LinkedIn URL (taken from your old portfolio's navbar).
 - [ ] `content/site.ts`: final CGPA (currently 8.58).
-- [ ] Set `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `NEXT_PUBLIC_SITE_URL` in Vercel.
+- [x] `CONTACT_TO_EMAIL` and `NEXT_PUBLIC_SITE_URL` set in Vercel (Production).
+- [ ] Add `RESEND_API_KEY` in Vercel → Settings → Environment Variables (type **Secret**, Production), then redeploy. Until then the form shows a friendly error with a mailto fallback.
 
 ## Content facts to confirm
 
