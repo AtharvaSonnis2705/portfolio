@@ -52,14 +52,11 @@ export const site = {
   about: [
     "I'm Atharva, a Software Engineer who builds AI-powered products end to end. I graduated in 2026 with a B.E. in Computer Engineering from Vidyalankar Institute of Technology, Mumbai.",
     "As a frontend intern at Applied Cloud Computing I worked on a Tata Mutual Fund project — rebuilding a legacy modal into a responsive full-page view for complex banking data, and building a reusable nominee-entry component wired to REST APIs with validation. It taught me that the unglamorous parts — validation, edge cases, readable data — are where users actually feel quality.",
-    "Since then I've been working toward the AI-engineer half of my toolkit: a TensorFlow/NLTK intent classifier for a mental-health support chatbot, an OpenAI-powered transcription and summarization app, and an analytics dashboard built at the Auraflix Tech-AI hackathon. I care about AI features that are grounded, honest about uncertainty, and wrapped in software that's pleasant to use.",
+    "Since then I've been working toward the AI-engineer half of my toolkit: CircularIQ, a hybrid-RAG assistant that answers SEBI compliance questions with paragraph-level citations; a TensorFlow/NLTK intent classifier for a mental-health support chatbot; an OpenAI-powered transcription and summarization app; and an analytics dashboard built at the Auraflix Tech-AI hackathon. I care about AI features that are grounded, honest about uncertainty, and wrapped in software that's pleasant to use.",
     "TODO(Atharva): add a personal line — what you do outside code.",
   ],
   now: {
-    building: [
-      "ScribeAI — audio → transcript → structured meeting summary",
-      "TODO(Atharva): your current RAG / LangGraph / MCP project",
-    ],
+    building: ["CircularIQ — an evaluation suite in CI: golden Q&A set, recall@k, faithfulness"],
     learning: ["TODO(Atharva): what you're learning right now (e.g. LLM evals, agent tooling)"],
   },
   education: [
@@ -104,6 +101,7 @@ export const site = {
         "LangChain",
         "LangGraph",
         "FAISS",
+        "pgvector",
         "ChromaDB",
         "AI Agents",
         "MCP",
@@ -125,6 +123,8 @@ export const site = {
         "Next.js",
         "Node.js",
         "Express",
+        "FastAPI",
+        "PostgreSQL",
         "Angular",
         "MongoDB",
         "Tailwind CSS",

@@ -1,0 +1,132 @@
+---
+title: CircularIQ
+summary: Ask about SEBI regulations and get answers that cite the exact paragraph and PDF page of the master circular they come from.
+outcome: Hybrid RAG over 4,922 pages of SEBI rules — every claim links to its paragraph and page, and off-topic questions never reach the LLM.
+date: "2026-10"
+role: Solo build — ingestion, retrieval, API, UI and deployment
+teamSize: 1
+status: shipped
+featured: true
+order: 1
+categories: [ai, fullstack, cloud]
+stack:
+  [RAG, Claude API, Python, FastAPI, PostgreSQL, pgvector, Voyage AI, Next.js, TypeScript, Docker]
+cover:
+  src: /images/projects/circulariq/cover.webp
+  alt: CircularIQ answering a SEBI compliance question with citation chips that link to the source paragraph and PDF page
+gallery:
+  - src: /images/projects/circulariq/01.webp
+    alt: Screenshot of the live CircularIQ demo answering how often a stock broker must settle a client's running account, with numbered citations and source cards
+    caption: The live demo, unedited — Sonnet 5.5 cited 5 of 6 retrieved passages, and every source card opens the PDF at the cited page.
+links:
+  github: https://github.com/AtharvaSonnis2705/circulariq
+  live: https://circulariq.vercel.app
+metrics:
+  - label: SEBI passages indexed (52 docs, 4,922 pages)
+    value: "4,453"
+  - label: Correct section ranked #1 after reranking (spot-check)
+    value: 8/8
+  - label: Answer text backed by a citation (Sonnet 5.5, 4 questions)
+    value: 86%
+  - label: Deployed retrieval latency
+    value: ~0.45 s
+tldr:
+  - A question-answering app for SEBI regulations that answers only from the circulars currently in force and cites the exact paragraph and PDF page behind every claim.
+  - Built it end to end — a polite PDF ingester with structure-aware chunking, hybrid pgvector + full-text search with reranking, a FastAPI service streaming Claude answers with API-native citations, and a Next.js UI.
+  - Live on Vercel + Render + Neon; on a spot-check every on-topic question retrieved the right section first, and 86% of Sonnet's answer text is backed by a citation.
+---
+
+## Problem
+
+SEBI's rules for brokers, mutual funds, depositories and other intermediaries live in master circulars that run to hundreds of pages each — the Master Circular for Mutual Funds alone is 748 pages. Compliance teams answer questions like _"how often must a broker settle a client's running account?"_ by searching PDFs by hand.
+
+Generic chatbots are no help here: they answer from stale training data and can't show where an answer came from. In compliance work, an answer without a source is unusable.
+
+## Approach & key decisions
+
+**Answer only from what's in force.** When a newer master circular on the same topic rescinds an older one, the old version is marked superseded and excluded from retrieval — it's kept in the database for future "what changed?" queries, but it can never be cited.
+
+**Chunk the way SEBI writes.** The documents use chapters, numbered paragraphs (`3.1.`, or `11.1.` inside Chapter 11) and annexures. Chunks follow those boundaries and never cross a chapter, so a citation reads like a reference a compliance officer would write: `Chapter IV › Paras 2.1–3 · p. 54`.
+
+**Hybrid retrieval in one SQL query.** Keyword search catches exact terms ("Regulation 54", "REF"); vector search catches paraphrases. Both live in the same Postgres database (pgvector + full-text on Neon), and Reciprocal Rank Fusion merges the two rankings without having to calibrate their scores against each other:
+
+```sql
+-- search.py (excerpt) — only documents still in force are searchable
+WITH live AS (
+  SELECT c.id, c.embedding, c.tsv
+  FROM chunks c JOIN documents d ON d.id = c.document_id
+  WHERE d.superseded_by IS NULL
+),
+...
+SELECT ...,
+  coalesce(1.0 / (%(k)s + vec.rank), 0) + coalesce(1.0 / (%(k)s + kw.rank), 0) AS score
+FROM (SELECT id FROM vec UNION SELECT id FROM kw) AS hits
+...
+```
+
+The 30 fused candidates go through a cross-encoder reranker (Voyage rerank-3), which picks the final six.
+
+**Citations come from the API, not the model's prose.** Each retrieved paragraph is sent to Claude as its own `search_result` content block with citations enabled, so every citation in the answer is tied to a real passage — the model can't invent a reference:
+
+```python
+# answer.py (excerpt)
+content.append({
+    "type": "search_result",
+    "source": h.citation_url,
+    "title": f"{h.title} — {h.section} (p. {h.page_start}, issued {h.issued_on})",
+    "content": [{"type": "text", "text": p} for p in paragraphs],  # one block per paragraph
+    "citations": {"enabled": True},
+})
+```
+
+**Refuse before spending tokens.** A calibrated rerank-score threshold answers off-topic questions with "not found" before any LLM call, and the prompt tells the model to say what the excerpts don't cover instead of guessing.
+
+**Cost-aware model routing.** Sonnet 5.5 writes answers until a daily budget is reached, then Haiku 5.5 takes over. Per-IP and global rate limits cap spend on the public demo.
+
+## Architecture
+
+<Architecture
+  caption="Ingestion runs offline and is idempotent; unchanged chunks reuse their stored vectors on re-ingest."
+  nodes={[
+    { label: "Ingest", detail: "sebi.gov.in PDFs → structure-aware chunks" },
+    { label: "Neon Postgres", detail: "pgvector + full-text · voyage-4 (1024-d)" },
+    { label: "Hybrid search", detail: "Vector ∪ keyword, RRF → 30 candidates" },
+    { label: "Rerank + gate", detail: "rerank-3 → top 6 · off-topic → “not found”" },
+    { label: "Claude", detail: "search_result blocks, citations on · SSE stream" },
+    { label: "Next.js UI", detail: "Citation chips · open PDF at page N" },
+  ]}
+/>
+
+## Challenges & how I solved them
+
+- **Calibrating "not found".** On-topic questions scored 0.71–0.93 after reranking, off-topic ones 0.25–0.67. I set the gate at 0.60 and let the prompt handle the near-miss cases (an RBI KYC question scored 0.67 because it sits close to SEBI's own KYC rules).
+- **Reranking earns its latency.** For "TER limits for equity MF schemes", the correct section came back #8 from hybrid search and #1 after reranking — worth the ~260 ms it adds.
+- **Sources that block bots.** SEBI's paginated listing and the RBI website reject automated requests. Instead of working around that, the downloader only uses pages served to normal visitors and stops on any block page. Master circulars consolidate every older circular on a topic, so 25 of them plus the latest 25 circulars still cover most of the rulebook.
+- **Citations vs. structured output.** Claude's citations can't be combined with structured outputs, so the citations themselves became the structure the UI renders — chips in the answer, source cards, and "open PDF at page N" links.
+- **Free-tier cold starts.** The API sleeps on Render's free tier. The frontend pings `/health` on load and shows a "waking up" state, so a cold start never looks like a crash.
+
+## Results
+
+Every number was measured on this corpus, not estimated.
+
+- **Corpus:** 52 SEBI documents in force (28 master circulars, 24 circulars) — 4,922 pages, 4,453 passages.
+- **Retrieval:** 8/8 on-topic spot-check questions retrieved the correct section as the #1 passage after reranking.
+- **Citation coverage:** 86% of answer text cited with Sonnet 5.5 vs 44% with Haiku 5.5 (4 questions).
+- **Speed:** time to first token 1.0 s (Sonnet 5.5) vs 3.4 s (Haiku 5.5); deployed retrieval ~0.45 s — embed ~130 ms, hybrid search ~50 ms, rerank ~260 ms.
+- **Cost per answer:** $0.022 with Sonnet 5.5, $0.0013 with Haiku 5.5 (Voyage within its free tier).
+- **Engineering:** CI runs ruff, pytest and a Docker build for the API, and lint, typecheck and Vitest for the web app.
+
+<Gallery />
+
+Try it at [circulariq.vercel.app](https://circulariq.vercel.app) — the first load can take up to a minute while the free-tier API wakes up.
+
+<Callout title="Information, not legal advice">
+  CircularIQ points to the source so you can check it — always read the linked paragraph before
+  acting on an answer.
+</Callout>
+
+## What I'd do next
+
+- A full evaluation suite in CI: a golden Q&A set, recall@k and MRR, LLM-judge faithfulness and citation accuracy, with Langfuse tracing.
+- An MCP server so Claude Desktop can query CircularIQ directly.
+- "What changed?": compare a new circular with the master circular it amends, using the superseded versions already in the database.
